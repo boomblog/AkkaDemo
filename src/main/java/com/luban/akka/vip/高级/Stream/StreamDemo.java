@@ -23,19 +23,20 @@ public class StreamDemo {
 
     public static void main(String[] args) {
         ActorSystem system = ActorSystem.create("sys");
+        Materializer materializer = ActorMaterializer.create(system);
 
         // 数据来源、流的起点
         // Source 包括两个泛型：第一个泛型表示它产生的数据类型，第二个泛型表示运行时产生的其他辅助数据，假如没有则设置为 NotUsed。
         Source<Integer, NotUsed> source = Source.range(1, 5);
 
-        // 定义sink，用来循环打印数据，此时
-        Sink<Integer, CompletionStage<Done>> sink = Sink.foreach(System.out::println);
+        // 定义sink，用来循环打印数据
+        Sink<Integer, CompletionStage<Done>> sink1 = Sink.foreach(System.out::println);
+        Sink<Integer, CompletionStage<Done>> sink2 = Sink.foreach(System.out::println);
 
         // 使用sink操作数据，此时会创建出一个RunnableGraph对象
-        RunnableGraph<NotUsed> graph = source.to(sink);
+        RunnableGraph<NotUsed> graph = source.alsoTo(sink1).to(sink2);
 
         // 当执行 RunnableGraph.run 方法时，需要传入一个 Materializer 对象，它主要用来给流分配 Actor 并驱动其执行。
-        Materializer materializer = ActorMaterializer.create(system);
         graph.run(materializer);
     }
 }

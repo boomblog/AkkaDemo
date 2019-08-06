@@ -51,14 +51,12 @@ public class PersistDemo {
         public Receive createReceive() {
             return receiveBuilder().matchAny(msg -> {
                 if (msg.equals("add")) {
-                    persist(msg, new Procedure<Object>() {
-                        @Override
-                        public void apply(Object param) throws Exception {
-                            count++;
+                    persist(msg, param -> {
+                        System.out.println("==========="+param);
+                        count++;
 
-                            if (count % 2 == 0) {
-                                saveSnapshot(count);
-                            }
+                        if (count % 2 == 0) {
+                            saveSnapshot(count);
                         }
                     });
                 } else if(msg.equals("error")) {
@@ -74,7 +72,7 @@ public class PersistDemo {
         ActorSystem system = ActorSystem.create("sys", ConfigFactory.load("persist.conf"));
         ActorRef ref = system.actorOf(Props.create(SimpleActor.class));
 
-//        ref.tell("add", ActorRef.noSender());
+        ref.tell("add", ActorRef.noSender());
 //        ref.tell("add", ActorRef.noSender());
 //        ref.tell("error", ActorRef.noSender());
 //        ref.tell("add", ActorRef.noSender());
