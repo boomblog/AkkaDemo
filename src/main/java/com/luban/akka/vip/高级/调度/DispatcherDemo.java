@@ -16,7 +16,7 @@ import com.typesafe.config.ConfigFactory;
  */
 public class DispatcherDemo {
 
-    static class ActorPinnedDemo extends AbstractActor {
+    static class SimpleDemo extends AbstractActor {
         @Override
         public Receive createReceive() {
             return receiveBuilder().matchAny(msg -> {
@@ -28,12 +28,13 @@ public class DispatcherDemo {
 
     public static void main(String[] args) {
         ActorSystem system = ActorSystem.create("sys", ConfigFactory.load("dispacher.conf"));
-        for(int i=0;i<20;i++) {
+        for(int i=0;i<50;i++) {
             // 每个Actor一个线程池（池中只有一个线程）
-//            ActorRef ref = system.actorOf(Props.create(ActorPinnedDemo.class).withDispatcher("my-pinned-dispatcher"),"actorDemo"+i);
+//            ActorRef ref = system.actorOf(Props.create(SimpleDemo.class).withDispatcher("my-pinned-dispatcher"),"actorDemo"+i);
             // 公用一个线程池
-            ActorRef ref = system.actorOf(Props.create(ActorPinnedDemo.class).withDispatcher("my-threadpool-dispatcher"),"actorDemo"+i);
-            ref.tell("hello pinned",ActorRef.noSender());
+            ActorRef ref = system.actorOf(Props.create(SimpleDemo.class).withDispatcher("my-forkjoin-dispatcher"),"actorDemo"+i);
+//            ActorRef ref = system.actorOf(Props.create(SimpleDemo.class).withDispatcher("my-threadpool-dispatcher"),"actorDemo"+i);
+            ref.tell("hello",ActorRef.noSender());
         }
     }
 }
