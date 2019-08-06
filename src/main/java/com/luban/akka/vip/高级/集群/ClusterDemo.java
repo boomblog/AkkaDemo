@@ -41,21 +41,21 @@ public class ClusterDemo extends AbstractActor {
             if (message instanceof MemberUp) {
                 MemberUp mUp = (MemberUp) message;
                 Member m = mUp.member();
-                System.out.println(getSelf() + "-->Member " + m + "is Up: the role is " + m.roles());
+                System.out.println("-->Member " + m + "is Up: the role is " + m.roles());
             } else if (message instanceof UnreachableMember) {
                 UnreachableMember mUnreachable = (UnreachableMember) message;
                 Member m = mUnreachable.member();
-                System.out.println(getSelf() + "-->Member " + m + " detected as unreachable: the role is " + m.roles());
+                System.out.println("-->Member " + m + " detected as unreachable: the role is " + m.roles());
             } else if (message instanceof MemberRemoved) {
                 MemberRemoved mRemoved = (MemberRemoved) message;
                 Member m = mRemoved.member();
-                System.out.println(getSelf() + "-->Member " + m + " is Removed: the role is" + m.roles());
+                System.out.println("-->Member " + m + " is Removed: the role is" + m.roles());
             } else if (message instanceof MemberEvent) {
                 MemberEvent me = (MemberEvent) message;
                 Member m = me.member();
-                System.out.println(getSelf() + "-->MemverEvent: " + me + "" + m.roles());
+                System.out.println("-->MemverEvent: " + me + "" + m.roles());
             } else {
-                System.out.println(getSelf() + "-->Other: " + message);
+                System.out.println("-->Other: " + message);
                 unhandled(message);
             }
         }).build();
@@ -63,9 +63,8 @@ public class ClusterDemo extends AbstractActor {
 
     public static void main(String[] args) {
         String port = args[0];
-        String sysname = args[1];
         Config config = ConfigFactory.parseString("akka.remote.netty.tcp.port=" + port).withFallback(ConfigFactory.load("cluster.conf"));
-        ActorSystem system = ActorSystem.create(sysname, config);
+        ActorSystem system = ActorSystem.create("sys", config);
         system.actorOf(Props.create(ClusterDemo.class), "clusterDemo" + port);
     }
 }
