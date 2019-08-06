@@ -63,19 +63,6 @@ public class CircuitBreakerDemo {
                     });
         }
 
-        public void handlerMsg(String msg) {
-            if (msg.equals("error")) {
-                System.out.println("msg:" + msg);
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("msg:" + msg);
-            }
-        }
-
         @Override
         public Receive createReceive() {
             return receiveBuilder().matchAny(message -> {
@@ -84,7 +71,16 @@ public class CircuitBreakerDemo {
                     breaker.callWithSyncCircuitBreaker(new Callable<String>() {
                         @Override
                         public String call() throws Exception {
-                            handlerMsg(msg);
+                            if (msg.equals("error")) {
+                                System.out.println("msg:" + msg);
+                                try {
+                                    Thread.sleep(3000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                System.out.println("msg:" + msg);
+                            }
                             return msg;
                         }
                     });
