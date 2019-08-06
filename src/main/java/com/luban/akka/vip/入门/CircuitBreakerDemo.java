@@ -43,7 +43,9 @@ public class CircuitBreakerDemo {
         @Override
         public void preStart() throws Exception {
             super.preStart();
-            this.breaker = new CircuitBreaker(getContext().dispatcher(), getContext().system().scheduler(), 3, Duration.ofSeconds(1), Duration.ofSeconds(30))
+            // 调用报错或超时（超过1秒）失败次数加1，超过3次后进入开启状态，30秒后进入半开启状态，如果在半开启状态中处理第一个请求成功，则关闭熔断器，如果失败则重回开启状态。
+            this.breaker = new CircuitBreaker(getContext().dispatcher(), getContext().system().scheduler(),
+                    3, Duration.ofSeconds(1), Duration.ofSeconds(30))
                     .onOpen(new Runnable() {
                         public void run() {
                             System.out.println("---> 熔断器开启");
