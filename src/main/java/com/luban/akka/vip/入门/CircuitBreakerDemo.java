@@ -45,7 +45,7 @@ public class CircuitBreakerDemo {
             super.preStart();
             // 调用报错或超时（超过1秒）失败次数加1，超过3次后进入开启状态，30秒后进入半开启状态，如果在半开启状态中处理第一个请求成功，则关闭熔断器，如果失败则重回开启状态。
             this.breaker = new CircuitBreaker(getContext().dispatcher(), getContext().system().scheduler(),
-                    3, Duration.ofSeconds(1), Duration.ofSeconds(30))
+                    3, Duration.ofSeconds(1), Duration.ofSeconds(15))
                     .onOpen(new Runnable() {
                         public void run() {
                             System.out.println("---> 熔断器开启");
@@ -65,26 +65,23 @@ public class CircuitBreakerDemo {
 
         @Override
         public Receive createReceive() {
-            return receiveBuilder().matchAny(message -> {
-                if (message instanceof String) {
-                    String msg = (String) message;
-                    breaker.callWithSyncCircuitBreaker(new Callable<String>() {
-                        @Override
-                        public String call() throws Exception {
-                            if (msg.equals("error")) {
-                                System.out.println("msg:" + msg);
-                                try {
-                                    Thread.sleep(3000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                System.out.println("msg:" + msg);
+            return receiveBuilder().matchAny(msg -> {
+                breaker.callWithSyncCircuitBreaker(new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        if (msg.equals("error")) {
+                            System.out.println("msg:" + msg);
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                            return msg;
+                        } else {
+                            System.out.println("msg:" + msg);
                         }
-                    });
-                }
+                        return "success";
+                    }
+                });
             }).build();
         }
     }
@@ -93,7 +90,7 @@ public class CircuitBreakerDemo {
         ActorSystem system = ActorSystem.create("sys");
         ActorRef actorRef = system.actorOf(Props.create(CircuitBreakerActor.class), "circuitBreakerDemo");
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 40; i++) {
             if (i > 4) {
                 actorRef.tell("normal", ActorRef.noSender());
             } else {
@@ -101,7 +98,7 @@ public class CircuitBreakerDemo {
             }
 
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
