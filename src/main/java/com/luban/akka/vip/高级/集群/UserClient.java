@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class UserClient {
 
     public static void main(String[] args) {
-        ActorSystem system = ActorSystem.create("sys", ConfigFactory.load("cluster.conf"));
+        ActorSystem system = ActorSystem.create("sys", ConfigFactory.load("remote.conf"));
 
         Set<ActorPath> initContacts = new HashSet<ActorPath>(
                 Arrays.asList(
